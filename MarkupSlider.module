@@ -5,7 +5,7 @@ class MarkupSlider extends ModuleJS {
     protected $images; 
     protected $width  = 0;
     protected $height = 0; 
-    protected $theme  = 'bar';
+    protected $theme  = 'default';
     protected $useCaptions = false;
 	
 	public static function getModuleInfo() {
@@ -25,10 +25,6 @@ class MarkupSlider extends ModuleJS {
 		$info = $this->getModuleInfo();
 		$version = (int) $info['version']; 
 
-        $this->config->styles->add($this->config->urls->$class . "nivo/themes/default/default.css");
-        $this->config->styles->add($this->config->urls->$class . "nivo/themes/light/light.css");
-        $this->config->styles->add($this->config->urls->$class . "nivo/themes/dark/dark.css");
-        $this->config->styles->add($this->config->urls->$class . "nivo/themes/bar/bar.css");
 		$this->config->styles->add($this->config->urls->$class . "nivo/nivo-slider.css?v=$version"); 
 		$this->config->scripts->add($this->config->urls->$class . "nivo/jquery.nivo.slider.js?v=$version"); 
 	}
@@ -37,7 +33,17 @@ class MarkupSlider extends ModuleJS {
      *  Getters/Setters
      */
     public function getTheme() { return $this->theme; }
-    public function setTheme($t) { $this->theme  = $t; }
+    public function setTheme($t) { 
+        $this->theme  = $t; 
+
+		$class = $this->className();
+		$info = $this->getModuleInfo();
+		$version = (int) $info['version']; 
+        if(in_array($this->theme, array('default', 'light', 'dark', 'bar'))) 
+            $this->config->styles->add($this->config->urls->$class . "nivo/themes/{$this->theme}/{$this->theme}.css?v=$version");
+        else
+            $this->config->styles->add($this->config->urls->$class . "themes/{$this->theme}/{$this->theme}.css?v=$version");
+    }
         
     public function getWidth() { return $this->width; }
     public function setWidth($w) { $this->width = $w; }
