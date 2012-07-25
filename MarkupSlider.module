@@ -1,0 +1,92 @@
+<?php
+
+class MarkupSlider extends ModuleJS {
+
+    protected $images; 
+    protected $width  = 0;
+    protected $height = 0; 
+    protected $theme  = 'bar';
+    protected $useCaptions = false;
+	
+	public static function getModuleInfo() {
+		return array(
+                'title' => 'Slider Markup For Image Collection', 
+                'summary' => 'Generates HTML markup for images to be presented in a nivoslider', 
+                'version' => 100, 
+			);
+	}
+
+	public function init() {
+		$this->modules->get("JqueryCore"); 
+
+		parent::init();
+
+		$class = $this->className();
+		$info = $this->getModuleInfo();
+		$version = (int) $info['version']; 
+
+        $this->config->styles->add($this->config->urls->$class . "nivo/themes/default/default.css");
+        $this->config->styles->add($this->config->urls->$class . "nivo/themes/light/light.css");
+        $this->config->styles->add($this->config->urls->$class . "nivo/themes/dark/dark.css");
+        $this->config->styles->add($this->config->urls->$class . "nivo/themes/bar/bar.css");
+		$this->config->styles->add($this->config->urls->$class . "nivo/nivo-slider.css?v=$version"); 
+		$this->config->scripts->add($this->config->urls->$class . "nivo/jquery.nivo.slider.js?v=$version"); 
+	}
+
+    /**
+     *  Getters/Setters
+     */
+    public function getTheme() { return $this->theme; }
+    public function setTheme($t) { $this->theme  = $t; }
+        
+    public function getWidth() { return $this->width; }
+    public function setWidth($w) { $this->width = $w; }
+
+    public function getHeight() { return $this->height; }
+    public function setHeight($h) { $this->height = $h; }
+
+    public function getImages() { return $this->images; }
+    public function setImages($i) { $this->images = $i; }
+
+    public function getCaptions() { return $this->useCaptions; }
+    public function setCaptions($useCaptions) { $this->useCaptions = $useCaptions; }
+    
+    /**
+     * ___render 
+     * Render the markup
+     * @access public
+     * @return void
+     */
+    public function ___render() {
+        $out = <<<EOM
+        <div class="slider-wrapper theme-{$this->theme}">
+            <div class="ribbon"></div>
+            <div id="slider" class="nivoSlider">
+EOM;
+
+        foreach($this->images as $img) {
+            $sized = $img->size($this->width, $this->height)->url;
+            $caption = $this->useCaptions ? "title='{$img->description}'" : '';
+            $out .= "<img src='$sized' alt='{$img->description}' $caption/>";
+        };
+
+        $out .= <<<EOM
+            </div>
+            <div id="htmlcaption" class="nivo-html-caption">
+                <strong>This</strong> is an example of a <em>HTML</em> caption with <a href="#">a link</a>. 
+            </div>
+        </div>
+EOM;
+        return $out;
+    }
+
+	/** the following are specific to the Module interface **/
+	public function isSingular() {
+		return false; 
+	}
+
+	public function isAutoload() {
+		return false; 
+	}
+
+}
