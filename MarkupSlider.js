@@ -1,3 +1,5 @@
 $(window).load(function() {
-    $('.nivoSlider').nivoSlider();
+    $('.nivoSlider').nivoSlider({
+        effect: 'fade'
+    });
 });
