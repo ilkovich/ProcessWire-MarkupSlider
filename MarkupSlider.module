@@ -7,12 +7,14 @@ class MarkupSlider extends ModuleJS {
     protected $height = 0; 
     protected $theme  = 'default';
     protected $useCaptions = false;
+
+    public $id = 'slider';
 	
 	public static function getModuleInfo() {
 		return array(
                 'title' => 'Slider Markup For Image Collection', 
                 'summary' => 'Generates HTML markup for images to be presented in a nivoslider', 
-                'version' => 100, 
+                'version' => 102, 
 			);
 	}
 
@@ -64,22 +66,40 @@ class MarkupSlider extends ModuleJS {
      * @return void
      */
     public function ___render() {
-        $out = <<<EOM
-        <div class="slider-wrapper theme-{$this->theme}">
-            <div class="ribbon"></div>
-            <div id="slider" class="nivoSlider">
-EOM;
 
+        $first = true;
+        $images = array();
+            $out = '';
         foreach($this->images as $img) {
             $sized = $img->size($this->width, $this->height)->url;
             $caption = $this->useCaptions ? "title='{$img->description}'" : '';
-            $out .= "<img src='$sized' alt='{$img->description}' $caption/>";
+            //$onload = $first ? 'onload="$(this).trigger(\'imageload\')"' : '';
+            //$onload = $first ? 'onload="window.alert(\'here\')"' : '';
+            
+            if($first) {
+                $out .= <<<EOM
+                <img src='$sized' alt='{$img->description}' $caption />
+                <div class="slider-wrapper theme-{$this->theme}">
+                    <div class="ribbon"></div>
+                    <div id="{$this->id}" class="nivoSlider">
+EOM;
+            }
+            else 
+                $images[] = "<img src='$sized' alt='{$img->description}' $caption />";            
+            
+            $first = false;
         };
 
+        if(!isset(wire('config')->inlineScripts)) wire('config')->inlineScripts = new InlineScriptArray();
+
+        $script = "
+            window.NivoSlider = window.NivoSlider || {};
+            NivoSlider.sliders = NivoSlider.sliders || {};
+            NivoSlider.sliders.{$this->id} =  JSON.parse('" . preg_replace("@'@", "\\'", json_encode($images)) . "');
+        ";
+        wire('config')->inlineScripts->add('NivoSlider', $script);
+
         $out .= <<<EOM
-            </div>
-            <div id="htmlcaption" class="nivo-html-caption">
-                <strong>This</strong> is an example of a <em>HTML</em> caption with <a href="#">a link</a>. 
             </div>
         </div>
 EOM;
